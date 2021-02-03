@@ -29,12 +29,9 @@ import io.netty.channel.FixedRecvByteBufAllocator;
 import io.netty.channel.socket.DatagramPacket;
 import io.netty.channel.socket.nio.NioDatagramChannel;
 import io.netty.handler.timeout.IdleStateHandler;
-import io.netty.util.concurrent.ImmediateEventExecutor;
-import io.netty.util.concurrent.PromiseCombiner;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
-import java.util.LinkedList;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -99,27 +96,15 @@ public class UdpClient {
     }
 
     public void sendData(DatagramPacket datagram, Future callback) {
-        LinkedList<DatagramPacket> fragments = Utils.fragmentDatagram(datagram);
-        PromiseCombiner promiseCombiner = getPromiseCombiner(fragments);
-
-        promiseCombiner.finish(channel.newPromise().addListener((ChannelFutureListener) future -> {
-            if (future.isSuccess()) {
-                callback.complete(null);
-            } else {
-                callback.complete(Utils
-                        .createSocketError("Failed to send data: " + future.cause().getMessage()));
-            }
-        }));
-    }
-
-    private PromiseCombiner getPromiseCombiner(LinkedList<DatagramPacket> fragments) {
-        PromiseCombiner promiseCombiner = new PromiseCombiner(ImmediateEventExecutor.INSTANCE);
-        while (fragments.size() > 0) {
-            if (channel.isWritable()) {
-                promiseCombiner.add(channel.writeAndFlush(fragments.poll()));
-            }
+        WriteCallbackService writeCallbackService = new WriteCallbackService(datagram, callback, channel);
+        writeCallbackService.writeFragments();
+        if (!writeCallbackService.isWriteCalledForAllFragments()) {
+            UdpClientHandler udpClientHandler = (UdpClientHandler) channel.pipeline()
+                    .get(Constants.CONNECTIONLESS_CLIENT_HANDLER);
+            udpClientHandler = udpClientHandler == null ?
+                    (UdpClientHandler) channel.pipeline().get(Constants.CONNECT_CLIENT_HANDLER) : udpClientHandler;
+            udpClientHandler.addWriteCallback(writeCallbackService);
         }
-        return promiseCombiner;
     }
 
     public void receiveData(long readTimeout, Future callback) {

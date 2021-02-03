@@ -22,12 +22,15 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.socket.DatagramPacket;
 
+import java.util.LinkedList;
+
 /**
  * {@link UdpListenerHandler} is a ChannelInboundHandler implementation for udp listener.
  */
 public class UdpListenerHandler extends SimpleChannelInboundHandler<DatagramPacket> {
 
     private UdpService udpService;
+    protected LinkedList<WriteCallbackService> writeCallbackServices = new LinkedList<>();
 
     public UdpListenerHandler(UdpService udpService) {
         this.udpService = udpService;
@@ -42,5 +45,22 @@ public class UdpListenerHandler extends SimpleChannelInboundHandler<DatagramPack
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         Dispatcher.invokeOnError(udpService, cause.getMessage());
+    }
+
+    @Override
+    public void channelWritabilityChanged(ChannelHandlerContext ctx) throws Exception {
+        if (ctx.channel().isWritable() && writeCallbackServices.size() > 0) {
+            WriteCallbackService writeCallbackService = writeCallbackServices.getFirst();
+            if (writeCallbackService != null) {
+                writeCallbackService.writeFragments();
+                if (writeCallbackService.isWriteCalledForAllFragments()) {
+                    writeCallbackServices.remove(writeCallbackService);
+                }
+            }
+        }
+    }
+
+    public void addWriteCallback(WriteCallbackService writeCallbackService) {
+        writeCallbackServices.addLast(writeCallbackService);
     }
 }

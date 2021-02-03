@@ -24,12 +24,15 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.socket.DatagramPacket;
 import io.netty.handler.timeout.IdleStateEvent;
 
+import java.util.LinkedList;
+
 /**
  * {@link UdpClientHandler} ia a ChannelInboundHandler implementation for udp client.
  */
 public class UdpClientHandler extends SimpleChannelInboundHandler<DatagramPacket> {
 
     private Future callback;
+    protected LinkedList<WriteCallbackService> writeCallbackServices = new LinkedList<>();
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx,
@@ -60,8 +63,25 @@ public class UdpClientHandler extends SimpleChannelInboundHandler<DatagramPacket
         ctx.channel().pipeline().remove(Constants.READ_TIMEOUT_HANDLER);
     }
 
+    @Override
+    public void channelWritabilityChanged(ChannelHandlerContext ctx) throws Exception {
+        if (ctx.channel().isWritable() && writeCallbackServices.size() > 0) {
+            WriteCallbackService writeCallbackService = writeCallbackServices.getFirst();
+            if (writeCallbackService != null) {
+                writeCallbackService.writeFragments();
+                if (writeCallbackService.isWriteCalledForAllFragments()) {
+                    writeCallbackServices.remove(writeCallbackService);
+                }
+            }
+        }
+    }
+
     public void setCallback(Future callback) {
         this.callback = callback;
+    }
+
+    public void addWriteCallback(WriteCallbackService writeCallbackService) {
+        writeCallbackServices.addLast(writeCallbackService);
     }
 
 }

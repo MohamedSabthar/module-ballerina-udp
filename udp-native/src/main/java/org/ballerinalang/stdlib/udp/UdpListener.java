@@ -28,12 +28,9 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.FixedRecvByteBufAllocator;
 import io.netty.channel.socket.DatagramPacket;
 import io.netty.channel.socket.nio.NioDatagramChannel;
-import io.netty.util.concurrent.ImmediateEventExecutor;
-import io.netty.util.concurrent.PromiseCombiner;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
-import java.util.LinkedList;
 
 /**
  * {@link UdpListener} creates the udp client and handles all the network operations.
@@ -65,39 +62,26 @@ public class UdpListener {
 
     // invoke when caller call writeBytes() or sendDatagram()
     public static void send(DatagramPacket datagram, Channel channel, Future callback) {
-        LinkedList<DatagramPacket> fragments = Utils.fragmentDatagram(datagram);
-        PromiseCombiner promiseCombiner = getPromiseCombiner(fragments, channel);
-
-        promiseCombiner.finish(channel.newPromise().addListener((ChannelFutureListener) future -> {
-            if (future.isSuccess()) {
-                callback.complete(null);
-            } else {
-                callback.complete(Utils
-                        .createSocketError("Failed to send data: " + future.cause().getMessage()));
-            }
-        }));
+        WriteCallbackService writeCallbackService = new WriteCallbackService(datagram, callback, channel);
+        writeCallbackService.writeFragments();
+        if (!writeCallbackService.isWriteCalledForAllFragments()) {
+            UdpClientHandler udpClientHandler = (UdpClientHandler) channel.pipeline()
+                    .get(Constants.CONNECTIONLESS_CLIENT_HANDLER);
+            udpClientHandler = udpClientHandler == null ?
+                    (UdpClientHandler) channel.pipeline().get(Constants.CONNECT_CLIENT_HANDLER) : udpClientHandler;
+            udpClientHandler.addWriteCallback(writeCallbackService);
+        }
     }
 
     // invoke when service return byte[] or Datagram
     public static void send(UdpService udpService, DatagramPacket datagram, Channel channel) {
-        LinkedList<DatagramPacket> fragments = Utils.fragmentDatagram(datagram);
-        PromiseCombiner promiseCombiner = getPromiseCombiner(fragments, channel);
-
-        promiseCombiner.finish(channel.newPromise().addListener((ChannelFutureListener) future -> {
-            if (!future.isSuccess()) {
-                Dispatcher.invokeOnError(udpService, "Failed to send data.");
-            }
-        }));
-    }
-
-    private static PromiseCombiner getPromiseCombiner(LinkedList<DatagramPacket> fragments, Channel channel) {
-        PromiseCombiner promiseCombiner = new PromiseCombiner(ImmediateEventExecutor.INSTANCE);
-        while (fragments.size() > 0) {
-            if (channel.isWritable()) {
-                promiseCombiner.add(channel.writeAndFlush(fragments.poll()));
-            }
+        WriteCallbackService writeCallbackService = new WriteCallbackService(datagram, udpService, channel);
+        writeCallbackService.writeFragments();
+        if (!writeCallbackService.isWriteCalledForAllFragments()) {
+            UdpListenerHandler udpListenerHandler = (UdpListenerHandler) channel.pipeline()
+                    .get(Constants.LISTENER_HANDLER);
+            udpListenerHandler.addWriteCallback(writeCallbackService);
         }
-        return promiseCombiner;
     }
 
     // only invoke if the listener is a connected listener
