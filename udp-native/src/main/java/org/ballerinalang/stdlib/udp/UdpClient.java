@@ -140,6 +140,7 @@ public class UdpClient {
         }
 
         channel.read();
+        Utils.print("HIT read");
     }
 
     public void close(Future callback) {

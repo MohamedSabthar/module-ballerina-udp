@@ -13,140 +13,140 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.import ballerina/log;
-import ballerina/log;
+// import ballerina/log;
 import ballerina/test;
 import ballerina/io;
 
-@test:Config {dependsOn: [testContentReceive]}
-function testListenerRead() {
-    Client|Error? socketClient = new (localHost = "localhost");
-    if (socketClient is Client) {
-        string[] messages = ["Log message one", "Log message two", "Log message three"];
+// @test:Config {dependsOn: [testContentReceive]}
+// function testListenerRead() {
+//     Client|Error? socketClient = new (localHost = "localhost");
+//     if (socketClient is Client) {
+//         string[] messages = ["Log message one", "Log message two", "Log message three"];
 
-        foreach var msg in messages {
-            Datagram datagram = prepareDatagram(msg, remotePort = PORT1);
+//         foreach var msg in messages {
+//             Datagram datagram = prepareDatagram(msg, remotePort = PORT1);
 
-            var sendResult = socketClient->sendDatagram(datagram);
-            if (sendResult is ()) {
-                log:print("Datagram was sent to the remote host.");
-            } else {
-                test:assertFail(msg = sendResult.message());
-            }
-        }
+//             var sendResult = socketClient->sendDatagram(datagram);
+//             if (sendResult is ()) {
+//                 log:print("Datagram was sent to the remote host.");
+//             } else {
+//                 test:assertFail(msg = sendResult.message());
+//             }
+//         }
 
-        checkpanic socketClient->close();
+//         checkpanic socketClient->close();
 
-    } else if (socketClient is Error) {
-        log:printError("Error initializing UDP Client", err = socketClient);
-    }
-}
+//     } else if (socketClient is Error) {
+//         log:printError("Error initializing UDP Client", err = socketClient);
+//     }
+// }
 
-@test:Config {dependsOn: [testListenerRead]}
-function testCallerSendBytes() {
-    Client|Error? socketClient = new (localHost = "localhost");
-    if (socketClient is Client) {
-        string[] messages = ["Log message one", "Log message two", "Log message three"];
+// @test:Config {dependsOn: [testListenerRead]}
+// function testCallerSendBytes() {
+//     Client|Error? socketClient = new (localHost = "localhost");
+//     if (socketClient is Client) {
+//         string[] messages = ["Log message one", "Log message two", "Log message three"];
 
-        foreach var msg in messages {
-            Datagram datagram = prepareDatagram(msg, remotePort = PORT2);
+//         foreach var msg in messages {
+//             Datagram datagram = prepareDatagram(msg, remotePort = PORT2);
 
-            var sendResult = socketClient->sendDatagram(datagram);
-            if (sendResult is ()) {
-                log:print("Datagram was sent to the remote host.");
-            } else {
-                test:assertFail(msg = sendResult.message());
-            }
+//             var sendResult = socketClient->sendDatagram(datagram);
+//             if (sendResult is ()) {
+//                 log:print("Datagram was sent to the remote host.");
+//             } else {
+//                 test:assertFail(msg = sendResult.message());
+//             }
 
-            string readContent = receiveClientContent(socketClient);
-            // assert echo response
-            test:assertEquals(readContent, msg, "Found unexpected output");
+//             string readContent = receiveClientContent(socketClient);
+//             // assert echo response
+//             test:assertEquals(readContent, msg, "Found unexpected output");
 
-        }
+//         }
 
-        checkpanic socketClient->close();
+//         checkpanic socketClient->close();
 
-    } else if (socketClient is Error) {
-        log:printError("Error initializing UDP Client", err = socketClient);
-    }
-}
+//     } else if (socketClient is Error) {
+//         log:printError("Error initializing UDP Client", err = socketClient);
+//     }
+// }
 
-@test:Config {dependsOn: [testCallerSendBytes]}
-function testCallerSendDatagram() {
-    Client|Error? socketClient = new (localHost = "localhost");
-    if (socketClient is Client) {
-        string[] messages = ["hi", "who are you?", "other"];
+// @test:Config {dependsOn: [testCallerSendBytes]}
+// function testCallerSendDatagram() {
+//     Client|Error? socketClient = new (localHost = "localhost");
+//     if (socketClient is Client) {
+//         string[] messages = ["hi", "who are you?", "other"];
 
-        foreach var msg in messages {
-            Datagram datagram = prepareDatagram(msg, remotePort = PORT3);
+//         foreach var msg in messages {
+//             Datagram datagram = prepareDatagram(msg, remotePort = PORT3);
 
-            var sendResult = socketClient->sendDatagram(datagram);
-            if (sendResult is ()) {
-                log:print("Datagram was sent to the remote host.");
-            } else {
-                test:assertFail(msg = sendResult.message());
-            }
+//             var sendResult = socketClient->sendDatagram(datagram);
+//             if (sendResult is ()) {
+//                 log:print("Datagram was sent to the remote host.");
+//             } else {
+//                 test:assertFail(msg = sendResult.message());
+//             }
 
-            string response = receiveClientContent(socketClient);
-            io:println("Response from botServer: ", response);
+//             string response = receiveClientContent(socketClient);
+//             io:println("Response from botServer: ", response);
 
-        }
+//         }
 
-        checkpanic socketClient->close();
+//         checkpanic socketClient->close();
 
-    } else if (socketClient is Error) {
-        log:printError("Error initializing UDP Client", err = socketClient);
-    }
-}
+//     } else if (socketClient is Error) {
+//         log:printError("Error initializing UDP Client", err = socketClient);
+//     }
+// }
 
-@test:Config {dependsOn: [testCallerSendDatagram]}
-function testReturnDatagram() {
-    Client|Error? socketClient = new (localHost = "localhost");
-    if (socketClient is Client) {
-        string msg = "Hello Ballerina echo";
-        Datagram datagram = prepareDatagram(msg, remotePort = PORT4);
+// @test:Config {dependsOn: [testCallerSendDatagram]}
+// function testReturnDatagram() {
+//     Client|Error? socketClient = new (localHost = "localhost");
+//     if (socketClient is Client) {
+//         string msg = "Hello Ballerina echo";
+//         Datagram datagram = prepareDatagram(msg, remotePort = PORT4);
 
-        var sendResult = socketClient->sendDatagram(datagram);
-        if (sendResult is ()) {
-            log:print("Datagram was sent to the remote host.");
-        } else {
-            test:assertFail(msg = sendResult.message());
-        }
-        string readContent = receiveClientContent(socketClient);
-        test:assertEquals(readContent, msg, "Found unexpected output");
-        checkpanic socketClient->close();
+//         var sendResult = socketClient->sendDatagram(datagram);
+//         if (sendResult is ()) {
+//             log:print("Datagram was sent to the remote host.");
+//         } else {
+//             test:assertFail(msg = sendResult.message());
+//         }
+//         string readContent = receiveClientContent(socketClient);
+//         test:assertEquals(readContent, msg, "Found unexpected output");
+//         checkpanic socketClient->close();
 
-    } else if (socketClient is Error) {
-        log:printError("Error initializing UDP Client", err = socketClient);
-    }
-}
+//     } else if (socketClient is Error) {
+//         log:printError("Error initializing UDP Client", err = socketClient);
+//     }
+// }
 
-@test:Config {dependsOn: [testReturnDatagram]}
-function testConnectedListener() returns error? {
-    ConnectClient|Error? socketClient = new ("localhost", PORT5, timeout = 1);
-    if (socketClient is ConnectClient) {
-        string msg = "Echo from connet client";
+// @test:Config {dependsOn: [testReturnDatagram]}
+// function testConnectedListener() returns error? {
+//     ConnectClient|Error? socketClient = new ("localhost", PORT5, timeout = 1);
+//     if (socketClient is ConnectClient) {
+//         string msg = "Echo from connet client";
 
-        var sendResult = socketClient->writeBytes(msg.toBytes());
-        if (sendResult is ()) {
-            log:print("Data was sent to the remote host.");
-        } else {
-            test:assertFail(msg = sendResult.message());
-        }
-        (readonly & byte[])|Error res = socketClient->readBytes();
-        if (res is (readonly & byte[])) {
-            test:assertEquals(res, "You are running on 9999".toBytes(), "Found unexpected output");
-        } else {
-            // since the connected listener only accept the messages from the client running on port 9999
-            // this read will result in a timeout error
-            io:println("This client is not running on port 9999");
-        }
-        check socketClient->close();
-    } else if (socketClient is Error) {
-        log:printError("Error initializing UDP Client", err = socketClient);
-    }
-}
+//         var sendResult = socketClient->writeBytes(msg.toBytes());
+//         if (sendResult is ()) {
+//             log:print("Data was sent to the remote host.");
+//         } else {
+//             test:assertFail(msg = sendResult.message());
+//         }
+//         (readonly & byte[])|Error res = socketClient->readBytes();
+//         if (res is (readonly & byte[])) {
+//             test:assertEquals(res, "You are running on 9999".toBytes(), "Found unexpected output");
+//         } else {
+//             // since the connected listener only accept the messages from the client running on port 9999
+//             // this read will result in a timeout error
+//             io:println("This client is not running on port 9999");
+//         }
+//         check socketClient->close();
+//     } else if (socketClient is Error) {
+//         log:printError("Error initializing UDP Client", err = socketClient);
+//     }
+// }
 
-@test:Config {dependsOn: [testConnectedListener], enable:true}
+@test:Config {}
 function testListenerForSendingMultipleDatagrams() returns error? {
     Client socketClient = check new (timeout = 1);
 
@@ -161,12 +161,16 @@ function testListenerForSendingMultipleDatagrams() returns error? {
     int noOfBytesReceived = 0;
     int ittr =0;
     readonly & Datagram|Error res = socketClient->receiveDatagram();
-
+io:println("out");
     while (res is (readonly & Datagram)) {
+        io:println("in");
         ittr+=1;
-        io:println(ittr);
+        io:println("???????????????????????????????????", ittr);
         noOfBytesReceived += res.data.length();
         res = socketClient->receiveDatagram();
+        if (res is Error) {
+            break;
+        }
     }
 
     // listener sending multiple datagrams this client should recive atleast one datagram

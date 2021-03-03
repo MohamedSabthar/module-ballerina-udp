@@ -34,30 +34,33 @@ public class UdpClientHandler extends SimpleChannelInboundHandler<DatagramPacket
     @Override
     protected void channelRead0(ChannelHandlerContext ctx,
                                 DatagramPacket datagramPacket) throws Exception {
+        ctx.channel().pipeline().remove(Constants.READ_TIMEOUT_HANDLER);
         if (callback != null) {
             callback.complete(Utils.createReadonlyDatagramWithRecipientAddress(datagramPacket));
         }
-        ctx.channel().pipeline().remove(Constants.READ_TIMEOUT_HANDLER);
+        Utils.print("hit read0");
     }
 
     @Override
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
         if (evt instanceof IdleStateEvent) {
             // return timeout error
+            ctx.channel().pipeline().remove(Constants.READ_TIMEOUT_HANDLER);
             if (callback != null) {
                 callback.complete(Utils.createSocketError(Constants.ErrorType.ReadTimedOutError,
                         "Read timed out"));
             }
-            ctx.channel().pipeline().remove(Constants.READ_TIMEOUT_HANDLER);
         }
+        Utils.print("hit userEvent");
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+        ctx.channel().pipeline().remove(Constants.READ_TIMEOUT_HANDLER);
         if (callback != null) {
             callback.complete(Utils.createSocketError(cause.getMessage()));
         }
-        ctx.channel().pipeline().remove(Constants.READ_TIMEOUT_HANDLER);
+        Utils.print("hit exception");
     }
 
     public void setCallback(Future callback) {

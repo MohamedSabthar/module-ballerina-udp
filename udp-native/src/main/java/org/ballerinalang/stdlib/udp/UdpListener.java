@@ -74,6 +74,7 @@ public class UdpListener {
         PromiseCombiner promiseCombiner = getPromiseCombiner(fragments, channel);
 
         promiseCombiner.finish(channel.newPromise().addListener((ChannelFutureListener) future -> {
+            Utils.print("status =================================== " + future.isSuccess());
             if (future.isSuccess()) {
                 callback.complete(null);
             } else {
@@ -100,12 +101,13 @@ public class UdpListener {
         PromiseCombiner promiseCombiner = new PromiseCombiner(ImmediateEventExecutor.INSTANCE);
         int a = 0;
         while (fragments.size() > 0) {
-            ++a;
             if (channel.isWritable()) {
+                ++a;
                 Utils.print("*" + a);
                 promiseCombiner.add(channel.writeAndFlush(fragments.poll()));
             }
         }
+        Utils.print("Exit while loop %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
         return promiseCombiner;
     }
 

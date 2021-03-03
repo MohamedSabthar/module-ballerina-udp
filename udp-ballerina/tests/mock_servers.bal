@@ -15,91 +15,95 @@
 // under the License.
 import ballerina/io;
 
-const int PORT1 = 9000;
-const int PORT2 = 8080;
-const int PORT3 = 9001;
-const int PORT4 = 9002;
-const int PORT5 = 9003;
+// const int PORT1 = 9000;
+// const int PORT2 = 8080;
+// const int PORT3 = 9001;
+// const int PORT4 = 9002;
+// const int PORT5 = 9003;
 const int PORT6 = 9004;
 
-listener Listener logServer = new Listener(PORT1);
-listener Listener echoServer = new Listener(PORT2);
-listener Listener botServer = new Listener(PORT3);
+// listener Listener logServer = new Listener(PORT1);
+// listener Listener echoServer = new Listener(PORT2);
+// listener Listener botServer = new Listener(PORT3);
 
-service on logServer {
+// service on logServer {
 
-    remote function onBytes(readonly & byte[] data) returns Error? {
-        io:println(getString(data));
-    }
+//     remote function onBytes(readonly & byte[] data) returns Error? {
+//         io:println(getString(data));
+//     }
 
-    remote function onError(readonly & Error err) {
-        io:println(err.message());
-    }
-}
+//     remote function onError(readonly & Error err) {
+//         io:println(err.message());
+//     }
+// }
 
-service on echoServer {
+// service on echoServer {
 
-    remote function onBytes(readonly & byte[] data) returns (readonly & byte[])|Error? {
-        io:println("Received by listener:", getString(data));
-        return data;
-    }
+//     remote function onBytes(readonly & byte[] data) returns (readonly & byte[])|Error? {
+//         io:println("Received by listener:", getString(data));
+//         return data;
+//     }
 
-    remote function onError(readonly & Error err) {
-        io:println(err);
-    }
-}
+//     remote function onError(readonly & Error err) {
+//         io:println(err);
+//     }
+// }
 
-map<string> QuestionBank = {
-    "hi": "hi there!",
-    "who are you?": "I'm a ballerina bot"
-};
+// map<string> QuestionBank = {
+//     "hi": "hi there!",
+//     "who are you?": "I'm a ballerina bot"
+// };
 
-service on botServer {
+// service on botServer {
 
-    remote function onDatagram(readonly & Datagram datagram, Caller caller) returns Datagram|Error? {
-        string|error? dataString = getString(datagram.data);
-        io:println("Received data: ", dataString);
-        if (dataString is string && QuestionBank.hasKey(dataString)) {
-            string? response = QuestionBank[dataString];
-            if (response is string) {
-                return prepareDatagram(response, <string>caller.remoteHost, <int>caller.remotePort);
-            }
-        }
-        Error? res = caller->sendDatagram(prepareDatagram("Sorry,I Can’t help you with that", <string>caller.remoteHost, <int>
-        caller.remotePort));
-    }
+//     remote function onDatagram(readonly & Datagram datagram, Caller caller) returns Datagram|Error? {
+//         string|error? dataString = getString(datagram.data);
+//         io:println("Received data: ", dataString);
+//         if (dataString is string && QuestionBank.hasKey(dataString)) {
+//             string? response = QuestionBank[dataString];
+//             if (response is string) {
+//                 return prepareDatagram(response, <string>caller.remoteHost, <int>caller.remotePort);
+//             }
+//         }
+//         Error? res = caller->sendDatagram(prepareDatagram("Sorry,I Can’t help you with that", <string>caller.remoteHost, <int>
+//         caller.remotePort));
+//     }
 
-    remote function onError(readonly & Error err) {
-        io:println(err);
-    }
-}
+//     remote function onError(readonly & Error err) {
+//         io:println(err);
+//     }
+// }
 
-service on new Listener(PORT4) {
-    remote function onDatagram(readonly & Datagram datagram, Caller caller) returns Datagram|Error? {
-        io:println("Datagram received by listener datagram data lenght is: ", datagram.data.length());
-        return datagram;
-    }
-}
+// service on new Listener(PORT4) {
+//     remote function onDatagram(readonly & Datagram datagram, Caller caller) returns Datagram|Error? {
+//         io:println("Datagram received by listener datagram data lenght is: ", datagram.data.length());
+//         return datagram;
+//     }
+// }
 
-// this listener only listen to the client running on localhost:9999
-service on new Listener(PORT5, remoteHost = "localhost", remotePort = 9999) {
-    remote function onBytes(readonly & byte[] data) returns (readonly & byte[])|Error? {
-        io:println("Received by connected listener:", getString(data));
-        return <byte[] & readonly>("You are running on 9999".toBytes().cloneReadOnly());
-    }
-}
+// // this listener only listen to the client running on localhost:9999
+// service on new Listener(PORT5, remoteHost = "localhost", remotePort = 9999) {
+//     remote function onBytes(readonly & byte[] data) returns (readonly & byte[])|Error? {
+//         io:println("Received by connected listener:", getString(data));
+//         return <byte[] & readonly>("You are running on 9999".toBytes().cloneReadOnly());
+//     }
+// }
 
-//
+
 service on new Listener(PORT6) {
     remote function onDatagram(readonly & Datagram datagram, Caller caller) returns Error? {
         io:println("Datagram received by listener: ", getString(datagram.data));
         // return large data this will break the data in to multiple datagram and send it to client
         byte[] response = [];
-        response[80000] = 97;
+        response[8000000] = 97;
         check caller->sendDatagram({
             data: response,
             remoteHost: <string>caller.remoteHost,
             remotePort: <int>caller.remotePort
         });
+    }
+
+    remote function onError(readonly & Error err) {
+        io:println("++++++++++++++++:",err);
     }
 }
