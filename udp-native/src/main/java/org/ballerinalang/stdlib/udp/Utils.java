@@ -30,6 +30,7 @@ import io.ballerina.runtime.api.values.BString;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.socket.DatagramPacket;
 
+import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
@@ -106,7 +107,7 @@ public class Utils {
         ByteBuf content = datagram.content();
         int contentSize = content.readableBytes();
         LinkedList<DatagramPacket> fragments = new LinkedList<>();
-
+        Utils.print("**************************************: " + contentSize);
         while (contentSize > 0) {
             if (contentSize > Constants.DATAGRAM_DATA_SIZE) {
                 fragments.add(datagram.replace(content.readBytes(Constants.DATAGRAM_DATA_SIZE)));
@@ -134,5 +135,10 @@ public class Utils {
 
     public static Module getModule() {
         return udpModule;
+    }
+
+    public static void print(String s) {
+        PrintStream console = System.out;
+        console.println(s);
     }
 }

@@ -70,6 +70,7 @@ public class UdpListener {
     // invoke when caller call writeBytes() or sendDatagram()
     public static void send(DatagramPacket datagram, Channel channel, Future callback) {
         LinkedList<DatagramPacket> fragments = Utils.fragmentDatagram(datagram);
+        Utils.print("#################################: " + fragments.size());
         PromiseCombiner promiseCombiner = getPromiseCombiner(fragments, channel);
 
         promiseCombiner.finish(channel.newPromise().addListener((ChannelFutureListener) future -> {
@@ -85,6 +86,7 @@ public class UdpListener {
     // invoke when service return byte[] or Datagram
     public static void send(UdpService udpService, DatagramPacket datagram, Channel channel) {
         LinkedList<DatagramPacket> fragments = Utils.fragmentDatagram(datagram);
+        Utils.print("#################################: " + fragments.size());
         PromiseCombiner promiseCombiner = getPromiseCombiner(fragments, channel);
 
         promiseCombiner.finish(channel.newPromise().addListener((ChannelFutureListener) future -> {
@@ -96,8 +98,11 @@ public class UdpListener {
 
     private static PromiseCombiner getPromiseCombiner(LinkedList<DatagramPacket> fragments, Channel channel) {
         PromiseCombiner promiseCombiner = new PromiseCombiner(ImmediateEventExecutor.INSTANCE);
+        int a = 0;
         while (fragments.size() > 0) {
+            ++a;
             if (channel.isWritable()) {
+                Utils.print("*" + a);
                 promiseCombiner.add(channel.writeAndFlush(fragments.poll()));
             }
         }

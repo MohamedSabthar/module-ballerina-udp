@@ -146,9 +146,9 @@ function testConnectedListener() returns error? {
     }
 }
 
-@test:Config {dependsOn: [testConnectedListener], enable:false}
+@test:Config {dependsOn: [testConnectedListener], enable:true}
 function testListenerForSendingMultipleDatagrams() returns error? {
-    Client socketClient = check new (timeout = 0.1);
+    Client socketClient = check new (timeout = 1);
 
     string msg = "Send me the data";
 
@@ -159,9 +159,12 @@ function testListenerForSendingMultipleDatagrams() returns error? {
     });
 
     int noOfBytesReceived = 0;
+    int ittr =0;
     readonly & Datagram|Error res = socketClient->receiveDatagram();
 
     while (res is (readonly & Datagram)) {
+        ittr+=1;
+        io:println(ittr);
         noOfBytesReceived += res.data.length();
         res = socketClient->receiveDatagram();
     }
