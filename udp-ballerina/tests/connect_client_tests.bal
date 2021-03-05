@@ -40,12 +40,15 @@ function testConnectClientEcho() {
 
 @test:Config {dependsOn: [testConnectClientEcho]}
 isolated function testInvalidLocalHostInConnectClient() {
+    io:println("\n\n\n\n\n\n start testInvalidLocalHostInConnectClient");
     ConnectClient|Error? socketClient = new ("localhost", 48830, localHost = "invalid", timeout = 1.5);
     if (socketClient is ConnectClient) {
         test:assertFail(msg = "Provided invalid value for localHost this should return an Error");
     } else if (socketClient is Error) {
         io:println(socketClient);
     }
+    io:println("\n\n\n\n\n\n end testInvalidLocalHostInConnectClient");
+
 }
 
 @test:Config {dependsOn: [testInvalidLocalHostInConnectClient]}
