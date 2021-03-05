@@ -1,47 +1,47 @@
 [package]
 org = "ballerina"
 name = "udp"
-version = "0.9.0-alpha5"
+version = "@toml.version@"
 
 [[platform.java11.dependency]]
-path = "../udp-native/build/libs/udp-native-0.9.0-alpha5-SNAPSHOT.jar"
+path = "../udp-native/build/libs/udp-native-@project.version@.jar"
 groupId = "ballerina"
 artifactId = "udp"
-version = "0.9.0-alpha5-SNAPSHOT"
+version = "@project.version@"
 
 [[platform.java11.dependency]]
-path = "../udp-test-utils/build/libs/udp-test-utils-0.9.0-alpha5-SNAPSHOT.jar"
+path = "../udp-test-utils/build/libs/udp-test-utils-@project.version@.jar"
 groupId = "org.ballerinalang.stdlib.udp"
 scope = "testOnly"
 artifactId = "udp"
-version = "0.9.0-alpha5-SNAPSHOT"
+version = "@project.version@"
 
 [[platform.java11.dependency]]
 artifactId = "netty-handler"
-version = "4.1.50.Final"
-path = "./build/libs/netty-handler-4.1.50.Final.jar"
+version = "@netty.version@"
+path = "./build/libs/netty-handler-@netty.version@.jar"
 groupId = "io.netty"
 
 [[platform.java11.dependency]]
 artifactId = "netty-buffer"
-version = "4.1.50.Final"
-path = "./build/libs/netty-buffer-4.1.50.Final.jar"
+version = "@netty.version@"
+path = "./build/libs/netty-buffer-@netty.version@.jar"
 groupId = "io.netty"
 
 [[platform.java11.dependency]]
 artifactId = "netty-transport"
-version = "4.1.50.Final"
-path = "./build/libs/netty-transport-4.1.50.Final.jar"
+version = "@netty.version@"
+path = "./build/libs/netty-transport-@netty.version@.jar"
 groupId = "io.netty"
 
 [[platform.java11.dependency]]
 artifactId = "netty-common"
-version = "4.1.50.Final"
-path = "./build/libs/netty-common-4.1.50.Final.jar"
+version = "@netty.version@"
+path = "./build/libs/netty-common-@netty.version@.jar"
 groupId = "io.netty"
 
 [[platform.java11.dependency]]
 artifactId = "netty-resolver"
-version = "4.1.50.Final"
-path = "./build/libs/netty-resolver-4.1.50.Final.jar"
+version = "@netty.version@"
+path = "./build/libs/netty-resolver-@netty.version@.jar"
 groupId = "io.netty"

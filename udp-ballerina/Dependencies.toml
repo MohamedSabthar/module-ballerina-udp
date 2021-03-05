@@ -1,21 +1,9 @@
 [[dependency]]
 org = "ballerina"
-name = "jballerina.java"
-version = "0.9.0"
+name = "io"
+version = "@stdlib.io.version@"
 
 [[dependency]]
 org = "ballerina"
 name = "log"
-version = "1.1.0-alpha5"
-
-[[dependency]]
-org = "ballerina"
-name = "io"
-version = "0.6.0-alpha5"
-
-[[dependency]]
-org = "ballerina"
-name = "test"
-version = "0.0.0"
-
-
+version = "@stdlib.log.version@"

@@ -86,15 +86,23 @@ public class UdpClient {
     // needed for connection oriented client
     private void connect(SocketAddress remoteAddress, SocketAddress localAddress,
                          Future callback) {
+//        System.out.println("Connect triggered");
         clientBootstrap.connect(remoteAddress, localAddress)
                 .addListener((ChannelFutureListener) future -> {
+                    System.out.println("Inside future");
                     channel = future.channel();
                     channel.pipeline().replace(Constants.CONNECTIONLESS_CLIENT_HANDLER,
                             Constants.CONNECT_CLIENT_HANDLER, new UdpConnectClientHandler());
                     channel.config().setAutoRead(false);
+                    System.out.println("Inside future after");
+
                     if (future.isSuccess()) {
                         callback.complete(null);
+                        System.out.println("Inside success");
+
                     } else {
+                        System.out.println("Inside not success");
+
                         future.cause().printStackTrace();
                         callback.complete(Utils.createSocketError("Can't connect to remote host: "
                                 + future.cause().getMessage()));
