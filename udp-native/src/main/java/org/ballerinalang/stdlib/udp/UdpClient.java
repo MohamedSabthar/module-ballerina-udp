@@ -77,6 +77,7 @@ public class UdpClient {
             if (future.isSuccess()) {
                 callback.complete(null);
             } else {
+                future.cause().printStackTrace();
                 callback.complete(Utils.createSocketError("Error initializing UDP Client"));
             }
         });
@@ -94,6 +95,7 @@ public class UdpClient {
                     if (future.isSuccess()) {
                         callback.complete(null);
                     } else {
+                        future.cause().printStackTrace();
                         callback.complete(Utils.createSocketError("Can't connect to remote host: "
                                 + future.cause().getMessage()));
                     }
