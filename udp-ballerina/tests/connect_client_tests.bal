@@ -44,7 +44,7 @@ isolated function testInvalidLocalHostInConnectClient() {
     if (socketClient is ConnectClient) {
         test:assertFail(msg = "Provided invalid value for localHost this should return an Error");
     } else if (socketClient is Error) {
-        log:print("Error initializing UDP Client");
+        io:println(socketClient);
     }
 }
 
